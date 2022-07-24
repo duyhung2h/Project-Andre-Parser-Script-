@@ -902,7 +902,7 @@ for a in range(0, len(listCharacters), 1):
                                                          looping=False, short_description=
                                                          listCharacters[a].unitName + ": <EXP" +
                                                          listCharacters[a].unitName + "> XP until lvl up",
-                                                         display_on_screen=True, description_order=1000)
+                                                         display_on_screen=True, description_order=200)
     triggerEXPPanel.new_condition.player_defeated(source_player=1)
     # Hide EXP panel
     triggerNoEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "NoPanel", looping=False,
