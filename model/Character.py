@@ -2,15 +2,10 @@ class Character:
     """
     This is a_localArea Character class
 
-
     A character can have different attributes, such as unit_id, unit_name (their true name displayed in the scenario)
-
     characterClass indicates which class a_localArea character is, which will affect on their gear restriction.
-
     There are 4 character classes at the moment: warrior, rogue, ranger and soulweaver.
-
     They can also have different panel areas, according to their position on the list."""
-
 
     def __init__(self, unitName, unitId, characterClass, coreUnitId, skill1Icon, skill2Icon, maxRange, projectileId, hp,
                  atk, meleeArmor, pierceArmor, potraitId):

@@ -14,8 +14,9 @@ from model.LevelCheckArea import LevelCheckArea
 scenario_folder = "C:/Users/Admin/Games/Age of Empires 2 DE/76561198148041091/resources/_common/scenario/"
 
 # Source scenario to work with
-input_path = scenario_folder + "Tales of Tenebria version 0v9.aoe2scenario"
-output_path = scenario_folder + "Tales of Tenebria version 0v9 Parser Result.aoe2scenario"
+scenario_name = "Tales of Tenebria version 0v18"
+input_path = scenario_folder + scenario_name + ".aoe2scenario"
+output_path = scenario_folder + scenario_name + " Adding Equipment" + ".aoe2scenario"
 
 # declare scenario class
 source_scenario = AoE2DEScenario.from_file(input_path)
@@ -256,7 +257,7 @@ for a in range(0, len(listCharacters), 1):
         triggerCharacterSwitchLocation1 = source_trigger_manager.add_trigger(
             listCharacters[a].unitName + "CheckPotraitLoc" + str(b + 1),
             enabled=True, looping=True)
-        triggerCharacterSwitchLocation1.new_condition.timer(timer=1)
+        triggerCharacterSwitchLocation1.new_condition.timer(timer=2)
         triggerCharacterSwitchLocation1.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
                                                                            area_x1=characterSlotArea[b][0][0],
                                                                            area_x2=characterSlotArea[b][0][1],
@@ -606,11 +607,12 @@ for a in range(0, len(listCharacters), 1):
 triggerSeparator = source_trigger_manager.add_trigger("---AddExpToCharacters------")
 # check if character is in the party and P1 gained 1 food from gaining 1 kill to P2
 # -> gain 1 EXP
-for i in range(0, 100, 1):
+for i in range(0, 10, 1):
     for a in range(0, len(listCharacters), 1):
         # check p5
         triggerAddExpToCharP5 = source_trigger_manager.add_trigger("addEXPTo" + listCharacters[a].unitName + "P5",
                                                                    enabled=True, looping=True)
+        triggerAddExpToCharP5.new_condition.timer(timer=10)
         triggerAddExpToCharP5.new_condition.own_objects(source_player=5, quantity=1,
                                                         object_list=listCharacters[a].unitId)
         triggerAddExpToCharP5.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId,
@@ -618,8 +620,8 @@ for i in range(0, 100, 1):
         triggerAddExpToCharP5.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
                                                                  area_x1=449, area_x2=467,
                                                                  area_y1=466, area_y2=476)
-        triggerAddExpToCharP5.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD, quantity=1)
-        triggerAddExpToCharP5.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD,
+        triggerAddExpToCharP5.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD_STORAGE, quantity=1)
+        triggerAddExpToCharP5.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD_STORAGE,
                                                          operation=Operation.SUBTRACT, quantity=1)
         triggerAddExpToCharP5.new_effect.change_variable(quantity=1, operation=Operation.SUBTRACT,
                                                          variable=200 + a, message="EXP" + listCharacters[a].unitName)
@@ -627,15 +629,16 @@ for i in range(0, 100, 1):
         # check p1
         triggerAddExpToCharP1 = source_trigger_manager.add_trigger("addEXPTo" + listCharacters[a].unitName + "P1",
                                                                    enabled=True, looping=True)
+        triggerAddExpToCharP1.new_condition.timer(timer=10)
         triggerAddExpToCharP1.new_condition.own_objects(source_player=1, quantity=1,
                                                         object_list=listCharacters[a].unitId)
         triggerAddExpToCharP1.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId,
                                                            source_player=3)
-        triggerAddExpToCharP5.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
+        triggerAddExpToCharP1.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
                                                                  area_x1=449, area_x2=467,
                                                                  area_y1=466, area_y2=476)
-        triggerAddExpToCharP1.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD, quantity=1)
-        triggerAddExpToCharP1.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD,
+        triggerAddExpToCharP1.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD_STORAGE, quantity=1)
+        triggerAddExpToCharP1.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD_STORAGE,
                                                          operation=Operation.SUBTRACT, quantity=1)
         triggerAddExpToCharP1.new_effect.change_variable(quantity=1, operation=Operation.SUBTRACT,
                                                          variable=200 + a)
@@ -902,23 +905,27 @@ for a in range(0, len(listCharacters), 1):
                                                          display_on_screen=True, description_order=1000)
     triggerEXPPanel.new_condition.player_defeated(source_player=1)
     # Hide EXP panel
-    triggerNoEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "NoPanel", looping=True,
-                                                           enabled=True)
+    triggerNoEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "NoPanel", looping=False,
+                                                           enabled=False)
+    # Show EXP panel
+    triggerYesEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "YesPanel", looping=False,
+                                                            enabled=True)
+    # Hide EXP panel con&eff
     triggerNoEXPPanel.new_condition.bring_object_to_area(area_x1=449, area_x2=467,
                                                          area_y1=466, area_y2=472,
                                                          unit_object=listCharacters[a].coreUnitId, inverted=True)
     triggerNoEXPPanel.new_condition.or_()
     triggerNoEXPPanel.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId, source_player=6)
     triggerNoEXPPanel.new_effect.deactivate_trigger(trigger_id=triggerEXPPanel.trigger_id)
-    # Show EXP panel
-    triggerYesEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "YesPanel", looping=True,
-                                                            enabled=True)
+    triggerNoEXPPanel.new_effect.activate_trigger(trigger_id=triggerYesEXPPanel.trigger_id)
+    # Show EXP panel con&eff
     triggerYesEXPPanel.new_condition.bring_object_to_area(area_x1=449, area_x2=467,
                                                           area_y1=466, area_y2=472,
                                                           unit_object=listCharacters[a].coreUnitId)
     triggerYesEXPPanel.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId, source_player=6,
                                                     inverted=True)
     triggerYesEXPPanel.new_effect.activate_trigger(trigger_id=triggerEXPPanel.trigger_id)
+    triggerYesEXPPanel.new_effect.activate_trigger(trigger_id=triggerNoEXPPanel.trigger_id)
     triggerSeparator = source_trigger_manager.add_trigger("------------------")
 # run for each character
 triggerSeparator = source_trigger_manager.add_trigger("---Equipments------")
