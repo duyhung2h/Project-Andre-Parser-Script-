@@ -12,7 +12,7 @@ from model.Unit import Unit
 scenario_folder = "C:/Users/Admin/Games/Age of Empires 2 DE/76561198148041091/resources/_common/scenario/"
 
 # Source scenario to work with
-scenario_name = "Tales of Tenebria version 0v20v6"
+scenario_name = "Tales of Tenebria version 0v20v7"
 input_path = scenario_folder + scenario_name + ".aoe2scenario"
 output_path = scenario_folder + scenario_name + " Adding Enemies" + ".aoe2scenario"
 
@@ -118,7 +118,8 @@ for a_localArea in range(1, len(listLocalArea), 1):
     triggerSelectArea = source_trigger_manager.add_trigger(
         "SELECT:Area" + str(a_localArea), looping=True, enabled=True)
     triggerSelectArea.new_condition.timer(timer=10)
-    triggerSelectArea.new_condition.objects_in_area(area_x1=AreaCheckLocalArea.get_local_area()[a_localArea][0][0],
+    triggerSelectArea.new_condition.objects_in_area(quantity=1, object_group=ObjectClass.HERO,
+                                                    area_x1=AreaCheckLocalArea.get_local_area()[a_localArea][0][0],
                                                     area_x2=AreaCheckLocalArea.get_local_area()[a_localArea][0][1],
                                                     area_y1=AreaCheckLocalArea.get_local_area()[a_localArea][1][0],
                                                     area_y2=AreaCheckLocalArea.get_local_area()[a_localArea][1][1])
@@ -196,26 +197,31 @@ for a_localArea in range(1, len(listLocalArea), 1):
     # check if all enemies are killed
     triggerDetectAllEnemiesKilled = source_trigger_manager.add_trigger("P2AllKilledArea" + str(a_localArea))
 
-# check enemy tier per local area
-for a_enemyTier in range(1, 3, 1):
-    # create infantry enemies
-    triggerSeparator = source_trigger_manager.add_trigger("---CreateINF-------------", enabled=False)
-    listEnemy = EnemyList.get_enemy_infantry_list(a_enemyTier)
-    for b_unitId in range(0, len(listEnemy), 1):
-        triggerTurnFlagIntoEnemies = source_trigger_manager.add_trigger(
-            "ChkFlgTurnToINF_" + listEnemy[b_unitId].unitName,
-            enabled=True, looping=True)
-        # for a list of separate faction unit
-        # get naran faction units
-        listFaction = ["NAR"]
-        for c_factionId in range(0, len(listFaction), 1):
-            listFactionUnits = Unit.get_faction_unitid(faction="NAR")
-            for d_factionUnitId in range(0, len(listFactionUnits), 1):
-                if listEnemy[b_unitId].unitId == listFactionUnits[d_factionUnitId]:
-                    triggerTurnFlagIntoEnemies.new_condition.objects_in_area(area_x1=89, area_x2=89,
-                                                                             area_y1=460, area_y2=460,
-                                                                             quantity=1 + c_factionId, source_player=2,
-                                                                             object_list=600)
+    # check enemy tier per local area
+    #
+    # Depends on localarea, and party level (tier), will spawn different kind of enemies
+    # Tier will be a separate value, depends after checking partylevel variable result
+    for a_enemyTier in range(1, 3, 1):
+        # create infantry enemies
+        triggerSeparator = source_trigger_manager.add_trigger("---CreateINFTier" + str(a_enemyTier) + "----------",
+                                                              enabled=False)
+        listEnemy = EnemyList.get_enemy_infantry_list(a_enemyTier)
+        for b_unitId in range(0, len(listEnemy), 1):
+            triggerTurnFlagIntoEnemies = source_trigger_manager.add_trigger(
+                "ChkFlgTurnToINF_" + listEnemy[b_unitId].unitName,
+                enabled=True, looping=True)
+            # for a list of separate faction unit
+            # get naran faction units
+            listFaction = ["NAR"]
+            for c_factionId in range(0, len(listFaction), 1):
+                listFactionUnits = Unit.get_faction_unitid(faction=listFaction[c_factionId])
+                print("listFactionUnits" + str(listFactionUnits))
+                for d_factionUnitId in range(0, len(listFactionUnits), 1):
+                    if listEnemy[b_unitId].unitId == listFactionUnits[d_factionUnitId]:
+                        triggerTurnFlagIntoEnemies.new_condition.objects_in_area(area_x1=89, area_x2=89,
+                                                                                 area_y1=460, area_y2=460,
+                                                                                 quantity=1 + c_factionId, source_player=2,
+                                                                                 object_list=600)
 
 triggerEnd = source_trigger_manager.add_trigger("9===" + identification_name + " End===")
 
