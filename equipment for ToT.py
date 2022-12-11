@@ -1,27 +1,31 @@
-from AoE2ScenarioParser.objects.support.trigger_select import TriggerSelect
-from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 from AoE2ScenarioParser.datasets.trigger_lists import *
 from AoE2ScenarioParser.objects.support.new_condition import NewConditionSupport
 from AoE2ScenarioParser.objects.support.new_effect import NewEffectSupport
+from AoE2ScenarioParser.scenarios.aoe2_de_scenario import AoE2DEScenario
 
-from model.Equipment import Equipment
-from model.Weapon import Weapon
-from model.EquipmentArea import EquipmentArea
+from functions.RebuildingTriggers import RebuildingTriggers
 from model.Character import Character
+from model.Equipment import Equipment
+from model.EquipmentArea import EquipmentArea
 from model.LevelCheckArea import LevelCheckArea
+from model.Weapon import Weapon
 
 # File & Folder setup
 scenario_folder = "C:/Users/Admin/Games/Age of Empires 2 DE/76561198148041091/resources/_common/scenario/"
 
 # Source scenario to work with
-input_path = scenario_folder + "Tales of Tenebria version 0v9.aoe2scenario"
-output_path = scenario_folder + "Tales of Tenebria version 0v9 Parser Result.aoe2scenario"
+scenario_name = "Tales of Tenebria version 0v20v6"
+input_path = scenario_folder + scenario_name + ".aoe2scenario"
+output_path = scenario_folder + scenario_name + " Adding Equipment" + ".aoe2scenario"
 
 # declare scenario class
 source_scenario = AoE2DEScenario.from_file(input_path)
 
 # declare trigger manager to work with variables and triggers
 source_trigger_manager = source_scenario.trigger_manager
+
+# print num of triggers
+print("Number of triggers: " + str(len(source_trigger_manager.triggers)))
 
 # [x1, x2], [y1, y2]
 listCharactersEquipmentArea = EquipmentArea.get_equipmentarea()
@@ -57,23 +61,14 @@ for a in range(0, len(listCharacters), 1):
     except:
         print("variable already existed!")
 
-# remove past triggers
-triggerStart = 0
-triggerEnd = 0
-for triggerId in range(0, len(source_trigger_manager.triggers), 1):
-    if source_trigger_manager.triggers[triggerId].name == "equipment for ToT.py Start":
-        print(source_trigger_manager.triggers[triggerId].name)
-        triggerStart = triggerId
-    if source_trigger_manager.triggers[triggerId].name == "equipment for ToT.py End":
-        print(source_trigger_manager.triggers[triggerId].name)
-        triggerEnd = triggerId
-print(triggerStart, triggerEnd)
-for triggerId in range(triggerStart - 1, int(triggerEnd), 1):
-    source_trigger_manager.remove_trigger(
-        trigger_select=TriggerSelect.index(source_trigger_manager.triggers[triggerStart].trigger_id))
+
+# Rearrange trigger (push to a new list)
+identification_name = "equipment for ToT.py"
+source_trigger_manager.triggers = RebuildingTriggers.rebuild_trigger(self="", source_trigger_manager=source_trigger_manager,
+                                                                     identification_name=identification_name)
 
 # start adding triggers
-triggerStart = source_trigger_manager.add_trigger("equipment for ToT.py Start")
+triggerStart = source_trigger_manager.add_trigger("9===" + identification_name + " Start===")
 triggerTestCreateEquipment = source_trigger_manager.add_trigger("testCreateEquipment", enabled=True, looping=False)
 triggerTestCreateEquipment.new_condition.timer(timer=9)
 for a in range(0, len(listEquipments), 1):
@@ -256,7 +251,7 @@ for a in range(0, len(listCharacters), 1):
         triggerCharacterSwitchLocation1 = source_trigger_manager.add_trigger(
             listCharacters[a].unitName + "CheckPotraitLoc" + str(b + 1),
             enabled=True, looping=True)
-        triggerCharacterSwitchLocation1.new_condition.timer(timer=1)
+        triggerCharacterSwitchLocation1.new_condition.timer(timer=2)
         triggerCharacterSwitchLocation1.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
                                                                            area_x1=characterSlotArea[b][0][0],
                                                                            area_x2=characterSlotArea[b][0][1],
@@ -606,11 +601,12 @@ for a in range(0, len(listCharacters), 1):
 triggerSeparator = source_trigger_manager.add_trigger("---AddExpToCharacters------")
 # check if character is in the party and P1 gained 1 food from gaining 1 kill to P2
 # -> gain 1 EXP
-for i in range(0, 100, 1):
+for i in range(0, 10, 1):
     for a in range(0, len(listCharacters), 1):
         # check p5
         triggerAddExpToCharP5 = source_trigger_manager.add_trigger("addEXPTo" + listCharacters[a].unitName + "P5",
                                                                    enabled=True, looping=True)
+        triggerAddExpToCharP5.new_condition.timer(timer=10)
         triggerAddExpToCharP5.new_condition.own_objects(source_player=5, quantity=1,
                                                         object_list=listCharacters[a].unitId)
         triggerAddExpToCharP5.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId,
@@ -618,8 +614,9 @@ for i in range(0, 100, 1):
         triggerAddExpToCharP5.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
                                                                  area_x1=449, area_x2=467,
                                                                  area_y1=466, area_y2=476)
-        triggerAddExpToCharP5.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD, quantity=1)
-        triggerAddExpToCharP5.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD,
+        triggerAddExpToCharP5.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD_STORAGE,
+                                                                 quantity=1)
+        triggerAddExpToCharP5.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD_STORAGE,
                                                          operation=Operation.SUBTRACT, quantity=1)
         triggerAddExpToCharP5.new_effect.change_variable(quantity=1, operation=Operation.SUBTRACT,
                                                          variable=200 + a, message="EXP" + listCharacters[a].unitName)
@@ -627,15 +624,17 @@ for i in range(0, 100, 1):
         # check p1
         triggerAddExpToCharP1 = source_trigger_manager.add_trigger("addEXPTo" + listCharacters[a].unitName + "P1",
                                                                    enabled=True, looping=True)
+        triggerAddExpToCharP1.new_condition.timer(timer=10)
         triggerAddExpToCharP1.new_condition.own_objects(source_player=1, quantity=1,
                                                         object_list=listCharacters[a].unitId)
         triggerAddExpToCharP1.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId,
                                                            source_player=3)
-        triggerAddExpToCharP5.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
+        triggerAddExpToCharP1.new_condition.bring_object_to_area(unit_object=listCharacters[a].coreUnitId,
                                                                  area_x1=449, area_x2=467,
                                                                  area_y1=466, area_y2=476)
-        triggerAddExpToCharP1.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD, quantity=1)
-        triggerAddExpToCharP1.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD,
+        triggerAddExpToCharP1.new_condition.accumulate_attribute(source_player=1, attribute=Attribute.FOOD_STORAGE,
+                                                                 quantity=1)
+        triggerAddExpToCharP1.new_effect.modify_resource(source_player=1, tribute_list=Attribute.FOOD_STORAGE,
                                                          operation=Operation.SUBTRACT, quantity=1)
         triggerAddExpToCharP1.new_effect.change_variable(quantity=1, operation=Operation.SUBTRACT,
                                                          variable=200 + a)
@@ -902,23 +901,27 @@ for a in range(0, len(listCharacters), 1):
                                                          display_on_screen=True, description_order=1000)
     triggerEXPPanel.new_condition.player_defeated(source_player=1)
     # Hide EXP panel
-    triggerNoEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "NoPanel", looping=True,
-                                                           enabled=True)
+    triggerNoEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "NoPanel", looping=False,
+                                                           enabled=False)
+    # Show EXP panel
+    triggerYesEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "YesPanel", looping=False,
+                                                            enabled=True)
+    # Hide EXP panel con&eff
     triggerNoEXPPanel.new_condition.bring_object_to_area(area_x1=449, area_x2=467,
                                                          area_y1=466, area_y2=472,
                                                          unit_object=listCharacters[a].coreUnitId, inverted=True)
     triggerNoEXPPanel.new_condition.or_()
     triggerNoEXPPanel.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId, source_player=6)
     triggerNoEXPPanel.new_effect.deactivate_trigger(trigger_id=triggerEXPPanel.trigger_id)
-    # Show EXP panel
-    triggerYesEXPPanel = source_trigger_manager.add_trigger(listCharacters[a].unitName + "YesPanel", looping=True,
-                                                            enabled=True)
+    triggerNoEXPPanel.new_effect.activate_trigger(trigger_id=triggerYesEXPPanel.trigger_id)
+    # Show EXP panel con&eff
     triggerYesEXPPanel.new_condition.bring_object_to_area(area_x1=449, area_x2=467,
                                                           area_y1=466, area_y2=472,
                                                           unit_object=listCharacters[a].coreUnitId)
     triggerYesEXPPanel.new_condition.capture_object(unit_object=listCharacters[a].coreUnitId, source_player=6,
                                                     inverted=True)
     triggerYesEXPPanel.new_effect.activate_trigger(trigger_id=triggerEXPPanel.trigger_id)
+    triggerYesEXPPanel.new_effect.activate_trigger(trigger_id=triggerNoEXPPanel.trigger_id)
     triggerSeparator = source_trigger_manager.add_trigger("------------------")
 # run for each character
 triggerSeparator = source_trigger_manager.add_trigger("---Equipments------")
@@ -1418,7 +1421,7 @@ for a in range(0, len(listCharacters), 1):
         # add fourth trigger
         trigger4 = source_trigger_manager.add_trigger("------------")
 
-triggerEnd = source_trigger_manager.add_trigger("equipment for ToT.py End")
+triggerEnd = source_trigger_manager.add_trigger("9===" + identification_name + " End===")
 
 # Final step: write a_localArea modified scenario class to a_localArea new scenario file
 source_scenario.write_to_file(output_path)

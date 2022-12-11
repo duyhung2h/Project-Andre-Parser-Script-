@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Union
 from model.Unit import Unit
+import os
 from AoE2ScenarioParser.datasets.techs import TechInfo
 from AoE2ScenarioParser.datasets.units import UnitInfo
 from AoE2ScenarioParser.datasets.buildings import BuildingInfo
@@ -8,8 +9,10 @@ from AoE2ScenarioParser.datasets.heroes import HeroInfo
 
 import json
 
+print(os.path)
+path = os.path.join(os.path.dirname(__file__), 'unit data converted to json\\aoe2dat\\data', 'units_buildings.json')
 with open(
-        "D:\\Games\\SteamLibrary\\steamapps\\common\\AoE2DE\\Tools_Builds\\unit data converted to json\\aoe2dat\\data\\units_buildings.json") as file:
+        path) as file:
     data = json.load(file)
 
     data: dict[str, Union[dict, int, str]]

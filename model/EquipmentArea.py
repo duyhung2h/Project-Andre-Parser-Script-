@@ -1,4 +1,5 @@
 class EquipmentArea:
+    # [x1, x2], [y1, y2]
     def __init__(self, bootsArea, armorArea, headwearArea, weaponArea):
         self.bootsArea = bootsArea
         self.armorArea = armorArea
