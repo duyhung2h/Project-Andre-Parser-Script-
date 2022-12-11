@@ -25,7 +25,7 @@ File & Folder setup
 Copy the file name (click on the line and CTRL + C):
 
 ScenarioParser - ModifyAllUnits
-Tales of Tenebria version 0v20v6
+Tales of Tenebria version 0v20v7
 testGAIAunit
 '''
 
@@ -89,6 +89,7 @@ for triggerId in range(0, len(source_trigger_manager.triggers), 1):
 testTriggers = source_trigger_manager.triggers[test_position_start:test_position_end]
 try:
     print(testTriggers[0].trigger_id)
+    print("Spawner id: " + str(testTriggers[3].conditions[19].unit_object))
 
     print(testTriggers[0].conditions[1].object_type)
     print("Charles id: " + str(testTriggers[0].conditions[0].unit_object))

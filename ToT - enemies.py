@@ -194,8 +194,6 @@ for a_localArea in range(1, len(listLocalArea), 1):
                                                                       source_player=2,
                                                                       location_x=89, location_y=468)
             triggerCheckFlagSpawnEnemies.new_effect.display_instructions()
-    # check if all enemies are killed
-    triggerDetectAllEnemiesKilled = source_trigger_manager.add_trigger("P2AllKilledArea" + str(a_localArea))
 
     # check enemy tier per local area
     #
@@ -207,9 +205,32 @@ for a_localArea in range(1, len(listLocalArea), 1):
                                                               enabled=False)
         listEnemy = EnemyList.get_enemy_infantry_list(a_enemyTier)
         for b_unitId in range(0, len(listEnemy), 1):
+            unit = listEnemy[b_unitId]
             triggerTurnFlagIntoEnemies = source_trigger_manager.add_trigger(
-                "ChkFlgTurnToINF_" + listEnemy[b_unitId].unitName,
+                "ChkFlgTurnToINF_" + unit.unitName,
                 enabled=True, looping=True)
+            triggerTurnFlagIntoEnemies.new_condition.chance(quantity=chanceInf)
+            triggerTurnFlagIntoEnemies.new_condition.variable_value(variable=18, quantity=a_localArea,
+                                                                    comparison=Comparison.EQUAL)
+            triggerTurnFlagIntoEnemies.new_condition.objects_in_area(area_x1=0, area_y1=0,
+                                                                     area_x2=0, area_y2=0,
+                                                                     object_list=599 + b_enemyTier, quantity=1,
+                                                                     source_player=0)
+            # /// doi thanh relic va teleport, tao RE unit vao trong spawner
+            triggerTurnFlagIntoEnemies.new_effect.replace_object(object_list_unit_id=599 + b_enemyTier, source_player=0,
+                                                                 object_list_unit_id_2=285)
+            triggerTurnFlagIntoEnemies.new_effect.teleport_object(object_list_unit_id=285, area_x1=0, area_y1=0,
+                                                                  area_x2=0, area_y2=0, location_x=0, location_y=0)
+            triggerTurnFlagIntoEnemies.new_effect.remove_object(object_list_unit_id=285, area_x1=0, area_y1=0,
+                                                                area_x2=0, area_y2=0)
+            triggerTurnFlagIntoEnemies.new_effect.create_garrisoned_object(selected_object_ids=146508, source_player=2,
+                                                                           object_list_unit_id_2=unit.unitId)
+            # Tao them unit p3 o vi tri kiem tra de check loot
+            triggerTurnFlagIntoEnemies.new_effect.create_object(object_list_unit_id=600, source_player=3)
+            triggerTurnFlagIntoEnemies.new_effect.replace_object(object_list_unit_id=600, source_player=3,
+                                                                 object_list_unit_id_2=unit.unitId, area_x1=0,
+                                                                 area_x2=0, area_y1=0, area_y2=0)
+
             # for a list of separate faction unit
             # get naran faction units
             listFaction = ["NAR"]
@@ -217,11 +238,15 @@ for a_localArea in range(1, len(listLocalArea), 1):
                 listFactionUnits = Unit.get_faction_unitid(faction=listFaction[c_factionId])
                 print("listFactionUnits" + str(listFactionUnits))
                 for d_factionUnitId in range(0, len(listFactionUnits), 1):
-                    if listEnemy[b_unitId].unitId == listFactionUnits[d_factionUnitId]:
+                    if unit.unitId == listFactionUnits[d_factionUnitId]:
                         triggerTurnFlagIntoEnemies.new_condition.objects_in_area(area_x1=89, area_x2=89,
                                                                                  area_y1=460, area_y2=460,
-                                                                                 quantity=1 + c_factionId, source_player=2,
+                                                                                 quantity=1 + c_factionId,
+                                                                                 source_player=2,
                                                                                  object_list=600)
+    # check if all enemies are killed
+    triggerDetectAllEnemiesKilled = source_trigger_manager.add_trigger("P2AllKilledArea" + str(a_localArea))
+    # check loot (determined by e
 
 triggerEnd = source_trigger_manager.add_trigger("9===" + identification_name + " End===")
 
